@@ -13,9 +13,19 @@
     {
       "src": "/static/(.*)",
       "headers": {
-        "cache-control": "public, max-age=31536000, immutable"
+        "cache-control": "public, max-age=31536000, immutable",
+        "access-control-allow-origin": "*"
       },
       "continue": true
+    },
+    {
+      "src": "/manifest.json",
+      "headers": {
+        "content-type": "application/manifest+json",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate" 
+      },
+      "dest": "/manifest.json"
     },
     {
       "src": "/favicon.ico",
@@ -30,15 +40,28 @@
       "dest": "/logo512.png"
     },
     {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
       "src": "/service-worker.js",
       "dest": "/service-worker.js",
       "headers": {
-        "cache-control": "public, max-age=0, must-revalidate"
+        "cache-control": "public, max-age=0, must-revalidate",
+        "access-control-allow-origin": "*"
       }
+    },
+    {
+      "src": "/(.*)\\.js",
+      "headers": {
+        "content-type": "application/javascript",
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/(.*)\\.css",
+      "headers": {
+        "content-type": "text/css",
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
     },
     {
       "src": "/(.*)",

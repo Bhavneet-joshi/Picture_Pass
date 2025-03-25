@@ -48,10 +48,20 @@
       }
     },
     {
+      "src": "/main\\.(.*)\\.js",
+      "headers": {
+        "content-type": "application/javascript",
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-content-type-options": "nosniff"
+      },
+      "continue": true
+    },
+    {
       "src": "/(.*)\\.js",
       "headers": {
         "content-type": "application/javascript",
-        "cache-control": "public, max-age=31536000, immutable"
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-content-type-options": "nosniff"
       },
       "continue": true
     },

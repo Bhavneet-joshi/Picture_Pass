@@ -30,7 +30,9 @@
   "rules": {
     "no-useless-concat": "off",
     "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "no-unused-vars": ["error", { "varsIgnorePattern": "React" }],
+    "react/no-unescaped-entities": "off"
   },
   "settings": {
     "react": {

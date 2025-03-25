@@ -7,19 +7,6 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 
-// Filter out chrome-extension URLs and other problematic URLs
-function shouldCacheRequest(url) {
-  try {
-    const urlObj = new URL(url);
-    return (
-      urlObj.protocol === 'http:' || 
-      urlObj.protocol === 'https:'
-    );
-  } catch (e) {
-    return false;
-  }
-}
-
 // Cache name
 const CACHE_NAME = 'picture-pass-cache-v1';
 
@@ -47,7 +34,7 @@ self.addEventListener('install', event => {
 // Cache and return requests
 self.addEventListener('fetch', event => {
   // Skip chrome-extension requests
-  if (!shouldCacheRequest(event.request.url)) {
+  if (!event.request.url.startsWith('http')) {
     return;
   }
 
@@ -68,7 +55,7 @@ self.addEventListener('fetch', event => {
             // Clone the response
             const responseToCache = response.clone();
 
-            if (shouldCacheRequest(event.request.url)) {
+            if (event.request.url.startsWith('http')) {
               caches.open(CACHE_NAME)
                 .then(cache => {
                   cache.put(event.request, responseToCache);

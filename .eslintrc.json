@@ -1,10 +1,40 @@
 {
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
   "extends": [
-    "react-app"
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime"
+  ],
+  "overrides": [
+    {
+      "files": ["src/serviceWorkerRegistration.js", "src/service-worker.js", "public/service-worker.js"],
+      "rules": {
+        "no-restricted-globals": "off"
+      }
+    }
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react"
   ],
   "rules": {
-    "jsx-a11y/anchor-is-valid": "off",
     "no-useless-concat": "off",
-    "react-hooks/exhaustive-deps": "off"
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 } 

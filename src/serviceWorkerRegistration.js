@@ -20,10 +20,12 @@ const isLocalhost = Boolean(
 
 // Filter out chrome-extension URLs and other problematic URLs
 function shouldCacheRequest(url) {
+  // eslint-disable-next-line no-restricted-globals
   const urlObj = new URL(url, self.location.origin);
   return (
     urlObj.protocol === 'http:' || 
     urlObj.protocol === 'https:' || 
+    // eslint-disable-next-line no-restricted-globals
     urlObj.origin === self.location.origin
   );
 }

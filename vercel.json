@@ -41,5 +41,10 @@
   ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  ],
+  "github": {
+    "enabled": true,
+    "silent": false
+  },
+  "buildCommand": "CI=false npm run build"
 } 

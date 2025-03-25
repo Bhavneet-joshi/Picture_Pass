@@ -5,7 +5,7 @@ import PageTemplate from './pages/PageTemplate';
 import SeatSelection from './components/SeatSelection';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (

@@ -1,23 +1,16 @@
-import {RiSlideshow3Fill} from 'react-icons/ri';
-import React, {useEffect, useState} from 'react';
-import {TbMovie} from 'react-icons/tb';
-import {useParams, Link} from 'react-router-dom';
-import {FaPlay} from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { FaPlay, FaPlus } from 'react-icons/fa';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import SeatSelection from '../components/SeatSelection';
+import ErrorBoundary from '../components/ErrorBoundary';
+import LoadingSpinner from '../components/LoadingSpinner';
+import TrailerModal from '../components/TrailerModal';
 import Slider from 'react-slick';
-import {
-  AiOutlineSearch, AiOutlineLeft, AiFillCaretDown, AiFillHome, AiFillStar, AiOutlineMenu, AiFillPlayCircle,
-} from 'react-icons/ai';
 
-export default function SoloMovie(props) {
-  const [movie, setmovie] = useState([]);
-  const [language, setlanguage] = useState([]);
-  const [movieCrew, setMovieCrew] = useState([]);
-  const [type, setType] = useState([]);
-  const [company, setCompany] = useState([]);
-  const {id} = useParams();
-  const URL = `https://api.themoviedb.org/3/${props.url}/${id}?api_key=6cb47492a1b8e813721571c6352d2ea2`;
-
-  const settingCast = {
+const LgSize = ({ movie, movieCrew, selectedDate, setSelectedDate, selectedTime, setSelectedTime, selectedSeats, onSeatSelect, selectedParkingSpot, onParkingSpotSelect, showParking, setShowParking, selectedTheater, setSelectedTheater, onWatchTrailer }) => {
+  const sliderSettings = {
     infinite: false,
     speed: 500,
     slidesToShow: 6,
@@ -34,7 +27,7 @@ export default function SoloMovie(props) {
       {
         breakpoint: 600,
         settings: {
-          slidesToShow: 5,
+          slidesToShow: 3,
           slidesToScroll: 2,
           initialSlide: 2,
         },
@@ -46,293 +39,281 @@ export default function SoloMovie(props) {
           slidesToScroll: 1,
         },
       },
-    ],};
-
-
-  const RazerPay = () => {
-    const options = {
-      key: 'rzp_test_LbEFtvrkEXed8c',
-      amount: 399 * 100,
-      currency: 'INR',
-      name: 'picture',
-      description: 'Movie Purchase on Rental',
-      image: '../logo.png',
-      handler: () => {
-        alert('Payment Done');
-      },
-      theme: {color: '#DC2626'},
-    };
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+    ],
   };
+
+  return (
+    <div className="min-h-screen bg-dark-900">
+      {/* Movie Details */}
+      <section className="bg-dark-800 p-4 md:p-8">
+        <div className="container mx-auto flex flex-col md:flex-row gap-4 md:gap-8">
+          <Card hover={false} className="w-full md:w-64 h-64 md:h-96 mx-auto">
+            <img
+              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              alt={movie.title}
+              className="w-full h-full object-cover"
+            />
+          </Card>
+          
+          <div className="flex-1">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{movie.title}</h2>
+            <div className="flex flex-wrap gap-2 md:gap-4 mb-6">
+              {movie.genres?.map((genre) => (
+                <span key={genre.id} className="px-3 py-1 text-sm rounded bg-dark-700 text-white">
+                  {genre.name}
+                </span>
+              ))}
+            </div>
+            <p className="text-gray-400 mb-6 md:mb-8 max-w-3xl leading-relaxed">{movie.overview}</p>
+            
+            <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
+              <div className="flex flex-col md:flex-row md:gap-8">
+                <span className="text-gray-400 w-24">Director</span>
+                <span className="text-white">
+                  {movieCrew.find(crew => crew.job === 'Director')?.name || 'Unknown'}
+                </span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-8">
+                <span className="text-gray-400 w-24">Writers</span>
+                <span className="text-white">
+                  {movieCrew
+                    .filter(crew => crew.department === 'Writing')
+                    .map(writer => writer.name)
+                    .slice(0, 2)
+                    .join(', ')}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                variant="primary" 
+                icon={<FaPlay />} 
+                className="w-full sm:w-auto"
+                onClick={onWatchTrailer}
+              >
+                WATCH TRAILER
+              </Button>
+              <Button variant="outline" icon={<FaPlus />} className="w-full sm:w-auto">
+                TO WATCHLIST
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Cast Section */}
+      <section className="bg-dark-900 p-4 md:p-8">
+        <div className="container mx-auto">
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Cast</h3>
+          <Slider {...sliderSettings}>
+            {movieCrew.slice(0, 12).map((crew) => (
+              <div key={crew.id} className="px-2">
+                <Card className="h-full">
+                  <div className="p-4">
+                    <h4 className="text-white font-semibold truncate">{crew.name}</h4>
+                    <p className="text-gray-400 text-sm truncate">{crew.job}</p>
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </Slider>
+        </div>
+      </section>
+
+      {/* Date and Time Selection */}
+      <section className="bg-dark-900 p-4 md:p-8">
+        <div className="container mx-auto">
+          <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Select Date & Time</h3>
+          
+          <div className="flex overflow-x-auto gap-2 md:gap-4 mb-6 md:mb-8 pb-2">
+            {['11', '12', '13', '14', '15'].map((date) => (
+              <button
+                key={date}
+                onClick={() => setSelectedDate(date)}
+                className={`px-4 md:px-6 py-2 md:py-3 rounded-lg whitespace-nowrap ${
+                  selectedDate === date
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-dark-800 text-gray-400 hover:bg-dark-700'
+                }`}
+              >
+                {date}
+              </button>
+            ))}
+          </div>
+     
+          <div className="flex overflow-x-auto gap-2 md:gap-4 mb-6 md:mb-8 pb-2">
+            {['14:00', '17:00', '20:00', '23:00'].map((time) => (
+              <button
+                key={time}
+                onClick={() => setSelectedTime(time)}
+                className={`px-4 md:px-6 py-2 md:py-3 rounded-lg whitespace-nowrap ${
+                  selectedTime === time
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-dark-800 text-gray-400 hover:bg-dark-700'
+                }`}
+              >
+                {time}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-4">
+            <select
+              value={selectedTheater}
+              onChange={(e) => setSelectedTheater(e.target.value)}
+              className="w-full md:w-auto bg-dark-800 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="ocean">Ocean Mall</option>
+              <option value="downtown">Downtown</option>
+              <option value="westside">Westside</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* Seat Selection */}
+      <SeatSelection
+        selectedSeats={selectedSeats}
+        onSeatSelect={onSeatSelect}
+        selectedParkingSpot={selectedParkingSpot}
+        onParkingSpotSelect={onParkingSpotSelect}
+        showParking={showParking}
+        setShowParking={setShowParking}
+        movie={movie}
+      />
+    </div>
+  );
+};
+
+export default function SoloMovie(props) {
+  const [movie, setMovie] = useState([]);
+  const [movieCrew, setMovieCrew] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [trailerKey, setTrailerKey] = useState(null);
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const { id } = useParams();
+  const API_KEY = process.env.REACT_APP_TMDB_API_KEY || '3fd2be6f0c70a2a598f084ddfb75487c'; // Default key for deployment fallback
+  const URL = `https://api.themoviedb.org/3${props.url}/${id}?api_key=${API_KEY}`;
+  const CREDITS_URL = `https://api.themoviedb.org/3${props.url}/${id}/credits?api_key=${API_KEY}`;
+  const VIDEOS_URL = `https://api.themoviedb.org/3${props.url}/${id}/videos?api_key=${API_KEY}`;
+
+  const [selectedDate, setSelectedDate] = useState('11');
+  const [selectedTime, setSelectedTime] = useState('17:00');
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedTheater, setSelectedTheater] = useState('ocean');
+  const [selectedParkingSpot, setSelectedParkingSpot] = useState(null);
+  const [showParking, setShowParking] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
         const response = await fetch(URL);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch movie data: ${response.status} ${response.statusText}`);
+        }
         const jsonData = await response.json();
-        setmovie(jsonData);
-        setType(jsonData.genres);
-        setlanguage(jsonData.spoken_languages);
-        setCompany(jsonData.production_companies);
-        const crewResponse = await fetch(`https://api.themoviedb.org/3/${props.url}/${id}/credits?api_key=6cb47492a1b8e813721571c6352d2ea2`);
+        setMovie(jsonData);
+
+        const crewResponse = await fetch(CREDITS_URL);
+        if (!crewResponse.ok) {
+          throw new Error(`Failed to fetch crew data: ${crewResponse.status} ${crewResponse.statusText}`);
+        }
         const crewData = await crewResponse.json();
         setMovieCrew(crewData.crew);
+
+        // Fetch trailer data
+        const videosResponse = await fetch(VIDEOS_URL);
+        if (!videosResponse.ok) {
+          throw new Error(`Failed to fetch videos data: ${videosResponse.status} ${videosResponse.statusText}`);
+        }
+        const videosData = await videosResponse.json();
+        const officialTrailer = videosData.results.find(
+          video => video.type === 'Trailer' && video.official
+        );
+        if (officialTrailer) {
+          setTrailerKey(officialTrailer.key);
+        }
       } catch (error) {
-        console.log(error);
+        console.error('Error fetching data:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
-  }, [URL, id, props.url]);
+  }, [URL, CREDITS_URL, VIDEOS_URL]);
 
-  const LgSize = () => (
-    <>
-      <div className="flex justify-around py-4  bg-dark_grey-700 ">
-        <div className="flex gap-2">
-          <img src="../logo.png" className="w-12" alt="" />
-          <div className="flex ">
-            <div className="bg-white py-3 px-2 rounded-l">
-              <AiOutlineSearch />
-            </div>
-            <input type="search" name="" className="w-96 rounded-r outline-none" placeholder="Search for Movies, Events, Plays, Sports and Activities" />
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <div className="flex text-white cursor-pointer py-2">
-            <p>Bathinda</p>
-            <div className="py-1">
-              <AiFillCaretDown />
-            </div>
-          </div>
-          <button className="bg-red-600 rounded p-2 px-4 text-white">Sign in</button>
-          <div className=" text-white cursor-pointer py-3">
-            <AiOutlineMenu />
-          </div>
-        </div>
-      </div>
-      <div className="text-white bg-dark_grey-800  m-auto pb-2 px-72 py-2">
-        <Link className="text-white px-2" to="/">Home</Link>
-        <Link className="text-white px-2" to="/plays">Plays</Link>
-        <Link className="text-white px-2" to="/tvShow">Tv Shows</Link>
-        <Link className="text-white px-2" to="/movies">Movies</Link>
-      </div>
+  const handleSeatSelection = (seatId) => {
+    setSelectedSeats(prev =>
+      prev.includes(seatId)
+        ? prev.filter(id => id !== seatId)
+        : [...prev, seatId]
+    );
+  };
 
-      <div style={{backgroundImage: `url(https://image.tmdb.org/t/p/w500/${movie.backdrop_path})`}} className=" bg-right bg-cover   mx-20  rounded ">
-        <div className="flex text-white py-20 " style={{background: 'linear-gradient(to right, black 25%, rgba(0, 0, 0, 0.5),black '}}>
-          <div className="px-52 flex ">
-            <Link to={movie.homepage} key={movie.id} className="relative w-3/4 cursor-pointer flex justify-center ">
-              <div className="absolute flex top-1/2 py-1 px-2 rounded" style={{background: 'rgba(0,0,0,0.7)'}}>
-                <div className="mt-1 mr-1">
-                  <FaPlay />
-                </div>
-                <span>Trailer</span>
-              </div>
-              <img className="m-4 rounded"
-            style={{ width: "calc(100% - 2rem)" }} src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`} alt="" />
-            </Link>
-            <div className="mx-10 ">
-              {props.type === 'tv' ? (
-                <>
-                  <div className="font-bold text-2xl ">{movie.name}</div>
-                  <div className="my-2 text-gray-400">{movie.overview}</div>
-                  <div>
-                    S
-                    {movie.number_of_seasons}
-                    , Ep
-                    {movie.number_of_episodes}
-                  </div>
-                </>
-              ) :
-                (
-                  <>
-                    <div className="font-bold text-2xl ">{movie.original_title}</div>
-                    <div className="my-2 text-gray-400">{movie.overview}</div>
-                    <div>
-                      {movie.runtime}
-                      m ,
-                      {' '}
-                      {movie.release_date}
-                    </div>
-                  </>
-                )}
-              <div>
-                {' '}
-                {type.map((type) => `${type.name}` + ', ')}
-              </div>
-              <div>
-                {' '}
-                {language.map((language) => `${language.english_name}` + ', ')}
-              </div>
-              <div className="font-bold flex text-2xl py-3">
-                <div className=" pr-2 text-3xl  text-red-600 "><AiFillStar /></div>
-                {movie.popularity}
-                <span className="text-gray-500 text-sm px-2 pt-2">
-                  {' '}
-                  {movie.vote_count / 1000}
-                  K Votes
-                </span>
-              </div>
-              <button className="bg-red-600 text-white px-14 py-2 rounded" onClick={RazerPay}>Book Now</button>
-            </div>
-          </div>
-        </div>
-      </div>
+  const handleParkingSpotSelection = (spotId) => {
+    setSelectedParkingSpot(spotId);
+  };
 
-    </>
-  );
-  const MdSize = () => (
-    <>
-      <div className=" flex bg-dark_grey-800 p-3 font-bold text-xl  text-white">
-        <div className="mt-1 mr-1">
-          <AiOutlineLeft />
-        </div>
-        <div>{props.type === 'tv' ? movie.name : movie.original_title}</div>
+  const handleWatchTrailer = () => {
+    if (trailerKey) {
+      setIsTrailerOpen(true);
+    } else {
+      setError('Trailer not available for this movie.');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <LoadingSpinner size="large" />
       </div>
-      <Link to={movie.homepage} key={movie.id}>
-        <div className=" bg-center  bg-cover relative rounded mx-10 mt-5 text-white h-44" style={{backgroundImage: `url(https://image.tmdb.org/t/p/w500/${movie.backdrop_path})`}}>
-          <div className=" flex justify-center rounded  h-44" style={{background: 'rgba(0,0,0,0.5)'}}>
-            <div className="flex absolute top-1/2">
-              <div className="mt-1 mr-1">
-                <FaPlay />
-              </div>
-              <span>Trailer</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-      <div className="font-bold flex mx-10 text-2xl py-2">
-        <div className=" pr-2 text-3xl  text-red-600 "><AiFillStar /></div>
-        {movie.popularity}
-        <span className="text-gray-500 text-sm px-2 pt-2">
-          {' '}
-          {movie.vote_count / 1000}
-          K Votes
-        </span>
-      </div>
-      <div className="mx-10 ">
-        {props.type === 'tv' ? (
-          <>
-            <div className=" text-gray-500">{movie.overview}</div>
-            <div className="text-dark_grey-800 font-semibold">
-              S
-              {movie.number_of_seasons}
-              , Ep
-              {movie.number_of_episodes}
-            </div>
-            <div className="text-dark_grey-800 ">{type.map((type) => `${type.name}` + ', ')}</div>
-          </>
-        ) :
-          (
-            <>
-              <div className="my-1 text-gray-500 ">{movie.overview}</div>
-              <div className="text-dark_grey-800  font-semibold">
-                {movie.runtime}
-                m .
-                {' '}
-                {type.map((type) => `${type.name}` + ', ')}
-              </div>
-            </>
-          )}
-        <p className="p-2 text-white my-1 bg-dark_grey-700  rounded">
-          {' '}
-          {language.map((language) => `${language.english_name}` + ', ')}
-        </p>
-      </div>
-      <div className="z-10 fixed w-full bottom-0 bg-white pb-2 rounded-t">
-        <button className="bg-red-600 text-white py-2 mb-2  w-full rounded " onClick={RazerPay}>Book Now</button>
-        <div className=" className='z-10 bg-gradient-to-r from-cyan-300 to-blue-300 fixed w-full bottom-0  bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-50 border border-black
- flex justify-around rounded-full p-3'">
-          <Link to="/">
-            <div className="text-black text-3xl">
-              <AiFillHome />
-            </div>
-            <p className="text-black">Home</p>
-          </Link>
-          <Link to="/plays">
-            <div className="text-black text-3xl">
-              <AiFillPlayCircle />
-            </div>
-            <p className="text-black">Plays</p>
-          </Link>
-          <Link to="/tvShow">
-            <div className="text-black  text-3xl mx-2">
-              <RiSlideshow3Fill />
-            </div>
-            <p className="text-black">Tv Shows</p>
-          </Link>
-          <Link to="/movies">
-            <div className="text-black text-3xl mx-2">
-              <TbMovie />
-            </div>
-            <p className="text-black">Movies</p>
-          </Link>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-dark-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
         </div>
       </div>
-     
-    </>
-  );
+    );
+  }
+
   return (
-    <>
-      <div className="sm:block lg:hidden">
-        <MdSize />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-dark-900">
+        <LgSize
+          movie={movie}
+          movieCrew={movieCrew}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          selectedTime={selectedTime}
+          setSelectedTime={setSelectedTime}
+          selectedSeats={selectedSeats}
+          onSeatSelect={handleSeatSelection}
+          selectedParkingSpot={selectedParkingSpot}
+          onParkingSpotSelect={handleParkingSpotSelection}
+          showParking={showParking}
+          setShowParking={setShowParking}
+          selectedTheater={selectedTheater}
+          setSelectedTheater={setSelectedTheater}
+          onWatchTrailer={handleWatchTrailer}
+        />
       </div>
-      <div className="lg:block hidden">
-        <LgSize />
-      </div>
-      <div className="mx-10 my-10 ">
-        <h1 className="text-3xl font-bold">Top offers for you</h1>
-        <div className=" inline-flex gap-2 bg-yellow-100 my-2 border-yellow-200 px-10 py-4  border-dashed">
-          <img src="../logo.png" className="w-10 h-10" alt="" />
-          <div className="">
-            <p className="text-xl">10% off on movie munchies!</p>
-            <p className="text-gray-500">Tap to view details</p>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h1 className="font-bold text-2xl mx-10">Production Companies</h1>
-        <div className="flex flex-wrap justify-around my-10 mx-auto ">
-          {company.map((type) => (
-            type.logo_path === null ? '' : (
-              <div className="text-center">
-                <img className="w-14 m-auto" src={`https://image.tmdb.org/t/p/w500${type.logo_path}`} alt="" />
-                <p className="mt-3 ">{type.name}</p>
-                <p className="text-gray-500 ">{type.origin_country}</p>
-              </div>
-            )
-          ))}
-        </div>
-      </div>
-      <div>
-        <h1 className="font-bold text-2xl mx-10">Crew Members</h1>
-        <div className="flex flex-wrap justify-around my-10 mx-auto">
-          <div className="my-8">
-            <h2 className="text-gray-800 font-bold text-2xl mb-4">Cast and Crew</h2>
-            <Slider {...settingCast}>
-              {movieCrew.map((crewMember) => (
-                <div key={crewMember.id}>
-                  <div className="flex flex-col items-center">
-                    <div className="w-32 h-32">
-                      <img
-                        src={`https://image.tmdb.org/t/p/w500${crewMember.profile_path}`}
-                        alt="cast and crew members"
-                        className="w-full h-full rounded-full object-center object-cover"
-                      />
-                    </div>
-                    <h1 className="text-xl text-gray-800">{crewMember.name}</h1>
-                    <h5 className="text-sm text-gray-500">as {crewMember.job}</h5>
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          </div>
-          <div className="my-8">
-            <hr />
-          </div>
-          
-        </div>
-      </div>
-      
-    </>
+      <TrailerModal
+        isOpen={isTrailerOpen}
+        onClose={() => setIsTrailerOpen(false)}
+        trailerKey={trailerKey}
+      />
+    </ErrorBoundary>
   );
 }

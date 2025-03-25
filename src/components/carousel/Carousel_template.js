@@ -8,7 +8,8 @@ import { AiFillStar } from 'react-icons/ai';
 
 export default function CarouselTemplate(props) {
     const [images, setImages] = useState([]);
-    const URL = `https://api.themoviedb.org/3/${props.url}?api_key=6cb47492a1b8e813721571c6352d2ea2`;
+    const API_KEY = process.env.REACT_APP_TMDB_API_KEY || '3fd2be6f0c70a2a598f084ddfb75487c'; // Default key for deployment fallback
+    const URL = `https://api.themoviedb.org/3/${props.url}?api_key=${API_KEY}`;
     const onTop = () => document.documentElement.scrollTop = 0;
 
     useEffect(() => {
@@ -19,11 +20,10 @@ export default function CarouselTemplate(props) {
                 const movies = jsonData.results;
                 setImages(movies);
             } catch (error) {
-                console.log(error);
+                console.error('Error fetching data:', error);
             }
         };
         fetchData();
-        // Include URL in the dependency array to avoid the missing dependency warning
     }, [URL]);
 
     return (
@@ -39,7 +39,7 @@ export default function CarouselTemplate(props) {
                                 <div className=' py-1 text-green-600 text-xl'>
                                     <AiFillStar />
                                 </div>
-                                {image.popularity}
+                                {(Math.floor(image.popularity * 10) / 10).toFixed(1)}
                             </div>
                             {props.type === "tv" ?
                                 <>

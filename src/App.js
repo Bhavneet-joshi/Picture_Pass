@@ -1,28 +1,28 @@
 import './App.css';
-
 import Home from './pages/Home';
-import Navigation from './components/navbar/Navbar';
+import Header from './components/ui/Header';
+import AnimatedNavbar from './components/ui/AnimatedNavbar';
 import SoloMovie from './pages/SoloMovie';
 import Pagetemplate from './pages/PageTemplate';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import SeatSelection from './pages/SeatSelection';
 
 function App() {
   return (
-    <>
-      <Router>
-        <Routes>
-          <Route exact path='/' element={<Home />} />
-          <Route exact path='/movies/:id' element={<SoloMovie url="/movie" />} />
-          <Route exact path='/tv/:id' element={<SoloMovie url="/tv" type="tv" />} />
-          <Route exact path='/tvShow' element={<> <Navigation /> <Pagetemplate url="discover/tv" type="tv" /> </>} />
-          <Route exact path='/movies' element={<>  <Navigation /> <Pagetemplate url="discover/movie" /> </>} />
-          <Route exact path='/plays' element={<>  <Navigation /> <Pagetemplate url="movie/now_playing" /> </>} />
-          
-        </Routes>
-       
-      </Router>
-
-    </>
+    <Router>
+      <div className="app-container">
+        <Header />
+        <main>
+          <Routes>
+            <Route path="/" element={<PageTemplate />} />
+            <Route path="/movie/:id" element={<SoloMovie />} />
+            <Route path="/buy-tickets/:id" element={<SeatSelection />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        <AnimatedNavbar />
+      </div>
+    </Router>
   );
 }
 

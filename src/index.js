@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom';
 
 // Configure React Router future flags to resolve warnings
 if (window) {
@@ -31,7 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
       <React.StrictMode>
-        <App />
+        <BrowserRouter basename="/">
+          <App />
+        </BrowserRouter>
       </React.StrictMode>
     );
   } else {

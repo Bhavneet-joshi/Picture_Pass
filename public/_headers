@@ -1,13 +1,27 @@
 /*
-  Access-Control-Allow-Origin: *
-  Cache-Control: public, max-age=0, must-revalidate
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: same-origin
+  Content-Security-Policy: upgrade-insecure-requests
 
-/static/*
+/*.js
+  Content-Type: application/javascript
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Content-Type: text/css
   Cache-Control: public, max-age=31536000, immutable
 
 /manifest.json
   Content-Type: application/manifest+json
-  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.js
   Content-Type: application/javascript

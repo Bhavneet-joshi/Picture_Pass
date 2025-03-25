@@ -18,6 +18,16 @@ const isLocalhost = Boolean(
     window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
 );
 
+// Filter out chrome-extension URLs and other problematic URLs
+function shouldCacheRequest(url) {
+  const urlObj = new URL(url, self.location.origin);
+  return (
+    urlObj.protocol === 'http:' || 
+    urlObj.protocol === 'https:' || 
+    urlObj.origin === self.location.origin
+  );
+}
+
 export function register(config) {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.

@@ -1,28 +1,28 @@
+import React from 'react';
 import './App.css';
-import Home from './pages/Home';
-import Header from './components/ui/Header';
-import AnimatedNavbar from './components/ui/AnimatedNavbar';
 import SoloMovie from './pages/SoloMovie';
-import Pagetemplate from './pages/PageTemplate';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import SeatSelection from './pages/SeatSelection';
+import PageTemplate from './pages/PageTemplate';
+import SeatSelection from './components/SeatSelection';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
   return (
-    <Router>
-      <div className="app-container">
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<PageTemplate />} />
-            <Route path="/movie/:id" element={<SoloMovie />} />
-            <Route path="/buy-tickets/:id" element={<SeatSelection />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-        <AnimatedNavbar />
-      </div>
-    </Router>
+    <div className="App">
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movies" element={<PageTemplate url="discover/movie" />} />
+          <Route path="/tv" element={<PageTemplate url="discover/tv" type="tv" />} />
+          <Route path="/upcoming" element={<PageTemplate url="movie/upcoming" />} />
+          <Route path="/movies/:id" element={<SoloMovie url="/movie" />} />
+          <Route path="/tv/:id" element={<SoloMovie url="/tv" type="tv" />} />
+          <Route path="/buy-tickets/:id" element={<SeatSelection />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ErrorBoundary>
+    </div>
   );
 }
 

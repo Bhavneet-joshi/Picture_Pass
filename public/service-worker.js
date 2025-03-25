@@ -7,19 +7,34 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 
+// Filter out chrome-extension URLs and other problematic URLs
+function shouldCacheRequest(url) {
+  try {
+    const urlObj = new URL(url);
+    return (
+      urlObj.protocol === 'http:' || 
+      urlObj.protocol === 'https:'
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+// Cache name
 const CACHE_NAME = 'picture-pass-cache-v1';
+
+// URLs to cache
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/css/main.*.css',
-  '/static/js/main.*.js',
   '/manifest.json',
-  '/logo192.png',
-  '/logo512.png'
+  '/logo.png',
+  '/favicon.ico'
 ];
 
 // Install a service worker
 self.addEventListener('install', event => {
+  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -31,6 +46,11 @@ self.addEventListener('install', event => {
 
 // Cache and return requests
 self.addEventListener('fetch', event => {
+  // Skip chrome-extension requests
+  if (!shouldCacheRequest(event.request.url)) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -48,10 +68,12 @@ self.addEventListener('fetch', event => {
             // Clone the response
             const responseToCache = response.clone();
 
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
+            if (shouldCacheRequest(event.request.url)) {
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, responseToCache);
+                });
+            }
 
             return response;
           }
